@@ -1,4 +1,4 @@
-from flask import Flask, g
+from flask import Flask, g, render_template, flash, request, redirect
 import sqlite3
 
 
@@ -28,8 +28,22 @@ def fim_requisição(exc):
 def exibir_entradas():
     sql = "SELECT titulo, texto FROM entradas ORDER BY id DESC"
     cur = g.bd.execute(sql)
-    entradas = str([])
-    return entradas
+    entradas = []
+    for titulo, texto in cur.fetchall():
+        entradas.append({
+            "titulo": titulo,
+            "texto": texto
+            })
+    return render_template("exibir_entradas.html", posts=entradas)
+
+@app.route('/inserir', methods=['POST'])
+def inserir_entrada():
+    sql = "INSERT INTO entradas(titulo, texto) VALUES (?, ?);"
+    titulo = request.form['titulo']
+    texto = request.form['texto']
+    g.bd.execute(sql, [titulo, texto])
+    g.bd.commit()
+    return redirect('/')
 
 
 
@@ -45,15 +59,23 @@ def exibir_entradas():
 #- Uma interface igual do VSCode abrirá
 
 
-#Comandos pip
+#Comandos pip/python
 #pip flask
 #pip install python-dotenv
 #pip install pyngrok
 #pip freeze ==> Lista todas as bibliotecas instaladas no python
 #pip freeze > [nome.arquivo.txt] ==> salva em um arquivo txt o nome das bibliotecas instaladas
+#pip install -r requirements.txt ==> Irá instalar todas as bibliotecas que estão dentro do requirements.txt
+
+
+# sudo apt install python3-dev ==> No GitPod.io deu problema no python. Precisou rodar um comando de linux para forçar a install o Python3 na máquina.
 
 #Comandos terminal
 # sqlite3 blog.bd < esquema.sql
+# sqlite3 blog.bd ==> para entrar no banco e poder colocar comandos SQL
+# INSERT INTO entradas(titulo, texto) VALUES ('teste de entrada', 'texto de testye');
+# SELECT * FROM entradas;
+# Ctrl+D para sair do sqlite3
 
 #Flask
 # Após montar código, no terminal digite 'flask run'. Ele irá montar o servidor HTTP.
@@ -63,6 +85,7 @@ def exibir_entradas():
 
 #arquivo '.flaskenv' é um txt sem extensão, o qual ele configura o environment do servidor Flask
 
+# Comandos GIT para atualizar no github (não tem salvar aqui direto no git)
 #git add .
 #git commit -m "primeira parte"
 #git push
